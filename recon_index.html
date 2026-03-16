@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en" style="background:#0a0a0f">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Reconciliation Tool — John Perez</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Epilogue:ital,wght@0,300;0,400;1,300;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#0a0a0f;--bg2:#0f0f18;--bg3:#14141f;
+  --border:rgba(255,255,255,0.05);--border2:rgba(255,255,255,0.09);
+  --text:#eaeaf5;--text2:#8080a0;--text3:#404058;
+  --accent:#5b8dee;--accent2:#3b6fd4;
+  --green:#2dd4a0;--green-d:rgba(45,212,160,0.08);
+  --red:#f56565;--amber:#fbbf24;--purple:#a78bfa;
+  --mono:'JetBrains Mono',monospace;--display:'Syne',sans-serif;--body:'Epilogue',sans-serif;
+}
+html{background:var(--bg);scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(91,141,238,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(91,141,238,0.025) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;top:-160px;left:50%;transform:translateX(-50%);width:700px;height:500px;background:radial-gradient(ellipse,rgba(91,141,238,0.07) 0%,transparent 70%);pointer-events:none;z-index:0;}
+.wrap{position:relative;z-index:1;max-width:1080px;margin:0 auto;padding:0 28px;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;border-bottom:1px solid var(--border);background:rgba(10,10,15,0.85);backdrop-filter:blur(12px);}
+.nav-inner{max-width:1080px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:var(--display);font-size:15px;font-weight:700;color:var(--text);text-decoration:none;}
+.nav-logo span{color:var(--accent);}
+.nav-links{display:flex;align-items:center;gap:24px;list-style:none;}
+.nav-links a{font-family:var(--mono);font-size:11px;color:var(--text2);text-decoration:none;transition:color 0.2s;letter-spacing:0.04em;}
+.nav-links a:hover{color:var(--text);}
+.nav-cta{background:var(--accent)!important;color:white!important;padding:7px 16px!important;border-radius:6px!important;transition:background 0.2s!important;}
+.nav-cta:hover{background:var(--accent2)!important;}
+
+.hero{padding:150px 0 90px;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;color:var(--accent);background:rgba(91,141,238,0.1);border:1px solid rgba(91,141,238,0.2);padding:4px 11px;border-radius:20px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:24px;opacity:0;animation:fu 0.6s 0.1s forwards;}
+.e-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.hero-title{font-family:var(--display);font-size:clamp(40px,7vw,76px);font-weight:800;line-height:1.0;letter-spacing:-2px;color:var(--text);margin-bottom:20px;opacity:0;animation:fu 0.6s 0.2s forwards;}
+.hero-title .line2{display:block;color:var(--text2);font-weight:400;font-style:italic;font-family:var(--body);font-size:clamp(28px,5vw,54px);letter-spacing:-1px;}
+.hero-title .ac{color:var(--accent);}
+.hero-desc{font-size:16px;color:var(--text2);max-width:520px;line-height:1.7;margin-bottom:36px;font-weight:300;opacity:0;animation:fu 0.6s 0.3s forwards;}
+.hero-desc strong{color:var(--text);font-weight:400;}
+.hero-actions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;opacity:0;animation:fu 0.6s 0.4s forwards;}
+.btn-main{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:white;font-family:var(--mono);font-size:12px;font-weight:500;padding:12px 24px;border-radius:7px;text-decoration:none;transition:all 0.2s;border:1px solid var(--accent);letter-spacing:0.02em;}
+.btn-main:hover{background:var(--accent2);border-color:var(--accent2);transform:translateY(-1px);}
+.btn-outline{display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--text2);font-family:var(--mono);font-size:12px;padding:12px 24px;border-radius:7px;text-decoration:none;transition:all 0.2s;border:1px solid var(--border2);}
+.btn-outline:hover{color:var(--text);border-color:var(--text2);transform:translateY(-1px);}
+
+.stat-strip{display:flex;margin-top:64px;border:1px solid var(--border);border-radius:11px;background:var(--bg2);overflow:hidden;opacity:0;animation:fu 0.6s 0.5s forwards;}
+.stat{flex:1;padding:20px 24px;border-right:1px solid var(--border);}
+.stat:last-child{border-right:none;}
+.stat-value{font-family:var(--display);font-size:28px;font-weight:700;color:var(--text);line-height:1;margin-bottom:5px;letter-spacing:-0.5px;}
+.stat-value .unit{font-size:16px;color:var(--accent);}
+.stat-label{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;}
+
+section{padding:90px 0;}
+.divider{height:1px;background:var(--border);}
+.section-tag{font-family:var(--mono);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:14px;}
+.section-title{font-family:var(--display);font-size:clamp(26px,4vw,40px);font-weight:700;letter-spacing:-0.8px;color:var(--text);margin-bottom:14px;line-height:1.1;}
+.section-sub{font-size:15px;color:var(--text2);font-weight:300;max-width:480px;line-height:1.7;}
+
+/* RECON TYPE CARDS */
+.recon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:48px;}
+.recon-card{background:var(--bg2);border:1px solid var(--border);border-radius:11px;padding:24px;transition:border-color 0.2s;}
+.recon-card:hover{border-color:var(--border2);}
+.recon-card.primary{border-color:rgba(91,141,238,0.25);background:rgba(91,141,238,0.04);}
+.rc-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:14px;}
+.ic-blue{background:rgba(91,141,238,0.1);color:var(--accent);}
+.ic-purple{background:rgba(167,139,250,0.1);color:var(--purple);}
+.ic-amber{background:rgba(251,191,36,0.1);color:var(--amber);}
+.rc-title{font-family:var(--display);font-size:16px;font-weight:600;color:var(--text);margin-bottom:7px;letter-spacing:-0.2px;}
+.rc-body{font-size:13px;color:var(--text2);line-height:1.6;font-weight:300;}
+.rc-pills{display:flex;flex-wrap:wrap;gap:5px;margin-top:12px;}
+.rc-pill{font-family:var(--mono);font-size:9px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);padding:2px 7px;border-radius:4px;letter-spacing:0.04em;}
+
+/* OUTPUT PREVIEW */
+.output-box{background:var(--bg2);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-top:48px;}
+.ob-header{display:flex;align-items:center;gap:9px;padding:12px 18px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.tl-row{display:flex;gap:5px;}
+.tl{width:9px;height:9px;border-radius:50%;}
+.tl-r{background:#ef4444;opacity:0.45;}.tl-y{background:var(--amber);opacity:0.45;}.tl-g{background:var(--green);opacity:0.45;}
+.ob-fname{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.ob-body{padding:24px 28px;}
+.ob-label{font-family:var(--mono);font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.ob-label::after{content:'';flex:1;height:1px;background:var(--border);}
+.ob-text{font-size:13px;color:var(--text2);line-height:1.8;font-style:italic;font-weight:300;}
+.ob-text strong{color:var(--text);font-style:normal;font-weight:400;}
+
+/* STEPS */
+.steps-wrap{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-top:48px;}
+.step{padding:28px 24px;border-right:1px solid var(--border);}
+.step:last-child{border-right:none;}
+.step-num{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;margin-bottom:14px;}
+.step-title{font-family:var(--display);font-size:17px;font-weight:600;color:var(--text);margin-bottom:9px;letter-spacing:-0.3px;}
+.step-body{font-size:13px;color:var(--text2);line-height:1.6;font-weight:300;}
+.step-tech{display:flex;flex-wrap:wrap;gap:5px;margin-top:14px;}
+
+/* SKILLS */
+.skills-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:48px;}
+.skill-row{display:flex;align-items:flex-start;gap:12px;padding:18px;background:var(--bg2);border:1px solid var(--border);border-radius:9px;transition:border-color 0.2s;}
+.skill-row:hover{border-color:var(--border2);}
+.s-dot{width:5px;height:5px;border-radius:50%;background:var(--accent);margin-top:7px;flex-shrink:0;}
+.s-area{font-family:var(--display);font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}
+.s-detail{font-size:12px;color:var(--text2);font-weight:300;line-height:1.5;}
+
+/* STACK */
+.stack-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:36px;}
+.s-badge{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;color:var(--text2);background:var(--bg2);border:1px solid var(--border);padding:7px 14px;border-radius:7px;transition:all 0.2s;}
+.s-badge:hover{border-color:var(--border2);color:var(--text);}
+.s-bdot{width:5px;height:5px;border-radius:50%;}
+
+/* CTA */
+.cta-sec{text-align:center;padding:90px 0;position:relative;}
+.cta-sec::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:500px;height:350px;background:radial-gradient(ellipse,rgba(91,141,238,0.09) 0%,transparent 70%);pointer-events:none;}
+.cta-title{font-family:var(--display);font-size:clamp(28px,5vw,52px);font-weight:700;letter-spacing:-1.2px;color:var(--text);margin-bottom:14px;line-height:1.1;}
+.cta-sub{font-size:15px;color:var(--text2);font-weight:300;margin-bottom:32px;}
+.cta-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+
+footer{border-top:1px solid var(--border);padding:28px 0;}
+.footer-inner{max-width:1080px;margin:0 auto;padding:0 28px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;}
+.footer-left{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.footer-right{display:flex;gap:18px;}
+.footer-right a{font-family:var(--mono);font-size:10px;color:var(--text3);text-decoration:none;transition:color 0.2s;}
+.footer-right a:hover{color:var(--text2);}
+
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.reveal{opacity:0;transform:translateY(22px);transition:opacity 0.6s ease,transform 0.6s ease;}
+.reveal.visible{opacity:1;transform:translateY(0);}
+@media(max-width:768px){.recon-grid{grid-template-columns:1fr;}.steps{grid-template-columns:1fr;}.step{border-right:none;border-bottom:1px solid var(--border);}.step:last-child{border-bottom:none;}.skills-grid{grid-template-columns:1fr;}.stat-strip{flex-direction:column;}.stat{border-right:none;border-bottom:1px solid var(--border);}.stat:last-child{border-bottom:none;}.nav-links{display:none;}}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">Recon<span>AI</span></a>
+    <ul class="nav-links">
+      <li><a href="#types">Recon types</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#output">Output</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="app_demo.html" class="nav-cta">Live demo →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow"><div class="e-dot"></div>Finance AI · Portfolio project</div>
+    <h1 class="hero-title">
+      AI Reconciliation<br>
+      <span class="line2">Three types. <span class="ac">One tool.</span></span>
+    </h1>
+    <p class="hero-desc">
+      Automates <strong>bank, intercompany, and AP reconciliations</strong> in one platform. Fuzzy matching identifies near-matches, GPT-4o writes the sign-off narrative, and the audit file writes itself.
+    </p>
+    <div class="hero-actions">
+      <a href="app_demo.html" class="btn-main"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="2,1 12,6.5 2,12"/></svg>View live demo</a>
+      <a href="https://github.com/johnperezlondon-star/recon-ai" target="_blank" class="btn-outline"><svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor"><path d="M6.5 0C2.9 0 0 2.9 0 6.5c0 2.9 1.9 5.3 4.5 6.2.3.1.4-.1.4-.3v-1.1C3 11.8 2.7 10.8 2.7 10.8c-.3-.8-.7-1-.7-1-.6-.4 0-.4 0-.4.7.1 1 .7 1 .7.6 1 1.5.7 1.9.5.1-.4.2-.7.4-.9C3.9 9.5 2.5 9 2.5 6.4c0-.7.3-1.3.7-1.8-.1-.2-.3-.8.1-1.7 0 0 .6-.2 1.8.7A6.3 6.3 0 016.5 3.3c.6 0 1.1.1 1.6.2 1.3-.8 1.8-.7 1.8-.7.4.9.1 1.6.1 1.7.4.5.7 1 .7 1.8 0 2.6-1.5 3.1-2.8 3.2.2.2.4.6.4 1.1v1.7c0 .2.1.4.4.3C11.1 11.8 13 9.4 13 6.5 13 2.9 10.1 0 6.5 0z"/></svg>View on GitHub</a>
+    </div>
+    <div class="stat-strip">
+      <div class="stat"><div class="stat-value">3<span class="unit">×</span></div><div class="stat-label">Recon types</div></div>
+      <div class="stat"><div class="stat-value">94<span class="unit">%</span></div><div class="stat-label">Match rate (demo)</div></div>
+      <div class="stat"><div class="stat-value">&lt;2<span class="unit">min</span></div><div class="stat-label">Full run time</div></div>
+      <div class="stat"><div class="stat-value">GPT<span class="unit" style="font-size:13px">-4o</span></div><div class="stat-label">Narrative engine</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="types">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-tag">What it reconciles</div>
+      <h2 class="section-title">Three workflows, one tool</h2>
+      <p class="section-sub">Each reconciliation type has different matching logic, exception classifications, and GPT-4o prompt — all built for the specific audience who reads it.</p>
+    </div>
+    <div class="recon-grid reveal">
+      <div class="recon-card primary">
+        <div class="rc-icon ic-blue"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="1" y="3" width="13" height="9" rx="1"/><path d="M1 6h13M4 9h2M8 9h3"/></svg></div>
+        <div class="rc-title">Bank reconciliation</div>
+        <div class="rc-body">Matches bank statement lines against GL entries using fuzzy string matching. Classifies exceptions and generates an audit-ready sign-off narrative.</div>
+        <div class="rc-pills"><span class="rc-pill">fuzzy matching</span><span class="rc-pill">exception classification</span><span class="rc-pill">timing diffs</span><span class="rc-pill">audit narrative</span></div>
+      </div>
+      <div class="recon-card">
+        <div class="rc-icon ic-purple"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="4" cy="7.5" r="2.5"/><circle cx="11" cy="7.5" r="2.5"/><path d="M6.5 7.5h2"/></svg></div>
+        <div class="rc-title">Intercompany reconciliation</div>
+        <div class="rc-body">Reconciles intercompany balances between entities for group consolidation. Isolates FX differences from genuine disagreements. References IFRS 10.</div>
+        <div class="rc-pills"><span class="rc-pill">ref-first matching</span><span class="rc-pill">FX isolation</span><span class="rc-pill">IFRS 10</span><span class="rc-pill">elimination notes</span></div>
+      </div>
+      <div class="recon-card">
+        <div class="rc-icon ic-amber"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h9v9H3z"/><path d="M6 6h3M6 9h3"/></svg></div>
+        <div class="rc-title">Accounts payable</div>
+        <div class="rc-body">Matches supplier statement invoices against the AP ledger. Detects missing invoices and flags duplicate payment risk before the payment run.</div>
+        <div class="rc-pills"><span class="rc-pill">invoice matching</span><span class="rc-pill">duplicate detection</span><span class="rc-pill">risk scoring</span><span class="rc-pill">exception actions</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="how" class="steps-wrap">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-tag">Architecture</div>
+      <h2 class="section-title">Two-layer pipeline</h2>
+      <p class="section-sub">Clean separation between matching logic and AI narrative — the engine runs fast and cheap, the AI layer only processes exceptions.</p>
+    </div>
+    <div class="steps reveal">
+      <div class="step">
+        <div class="step-num">01 / Matching layer</div>
+        <div class="step-title">Python engine</div>
+        <div class="step-body">Loads both CSVs, normalises columns, runs exact amount matching first, then fuzzy description matching for near-misses. Classifies everything into matched / exceptions / timing.</div>
+        <div class="step-tech"><span class="rc-pill">pandas</span><span class="rc-pill">SequenceMatcher</span><span class="rc-pill">python</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">02 / AI layer</div>
+        <div class="step-title">GPT-4o narrative</div>
+        <div class="step-body">Only exceptions are sent to the API — keeping cost under $0.05 per run. Three separate prompts for bank, IC, and AP — each written for the specific audience and sign-off requirement.</div>
+        <div class="step-tech"><span class="rc-pill">openai api</span><span class="rc-pill">prompt engineering</span><span class="rc-pill">JSON output</span></div>
+      </div>
+      <div class="step">
+        <div class="step-num">03 / Output layer</div>
+        <div class="step-title">Multi-format delivery</div>
+        <div class="step-body">Excel workbook with matched, exceptions, and timing tabs. Sign-off narrative text for the audit file. Streamlit UI with tab navigation and file upload for each recon type.</div>
+        <div class="step-tech"><span class="rc-pill">streamlit</span><span class="rc-pill">openpyxl</span><span class="rc-pill">excel</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="output">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-tag">Sample output</div>
+      <h2 class="section-title">Audit-ready in 2 minutes</h2>
+      <p class="section-sub">GPT-4o produces a formal reconciliation narrative that reads like a senior controller wrote it — because it's prompted to think like one.</p>
+    </div>
+    <div class="output-box reveal">
+      <div class="ob-header"><div class="tl-row"><div class="tl tl-r"></div><div class="tl tl-y"></div><div class="tl tl-g"></div></div><div class="ob-fname">bank_recon_signoff_june_2024.txt — generated by GPT-4o</div></div>
+      <div class="ob-body">
+        <div class="ob-label">Bank reconciliation sign-off narrative</div>
+        <div class="ob-text">
+          <p>The HSBC Operating Account bank reconciliation for June 2024 has been completed with a <strong>match rate of 94.2%</strong>, representing <strong>128 of 142 transactions</strong> successfully reconciled. The reconciliation is materially complete; the remaining unreconciled balance of <strong>£34,250</strong> comprises eight exception items requiring investigation and six timing differences of £12,800 which are expected to clear in early July.</p>
+          <br>
+          <p>The most significant exception is an <strong>unidentified BACS credit of £14,200</strong> received on 22 June with no corresponding general ledger entry — this should be investigated immediately with the treasury team. A <strong>potential duplicate CHAPS payment of £8,300</strong> posted on 14 June requires urgent review by the AP team; if confirmed, recovery action should be initiated before the July payment run.</p>
+          <br>
+          <p>All six timing differences are routine month-end items confirmed to have cleared by 3 July. This reconciliation is <strong>approved for sign-off</strong> subject to resolution of the two priority items before management accounts are finalised.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="skills">
+  <div class="wrap">
+    <div class="reveal">
+      <div class="section-tag">Skills demonstrated</div>
+      <h2 class="section-title">What this project shows</h2>
+      <p class="section-sub">A more complex project than variance analysis — three matching algorithms, three prompt types, duplicate detection, and audit documentation.</p>
+    </div>
+    <div class="skills-grid reveal">
+      <div class="skill-row"><div class="s-dot"></div><div><div class="s-area">Finance domain</div><div class="s-detail">Bank recon · Intercompany elimination · IFRS 10 · AP controls · Duplicate risk · Audit sign-off conventions</div></div></div>
+      <div class="skill-row"><div class="s-dot" style="background:var(--green)"></div><div><div class="s-area">Python / data engineering</div><div class="s-detail">Pandas pipeline · Fuzzy string matching · Duplicate detection · Multi-type classification · Configurable thresholds</div></div></div>
+      <div class="skill-row"><div class="s-dot" style="background:var(--amber)"></div><div><div class="s-area">AI / prompt engineering</div><div class="s-detail">Three specialised GPT-4o prompts · JSON-structured action output · Batch exception processing · Audience-specific tone</div></div></div>
+      <div class="skill-row"><div class="s-dot" style="background:var(--purple)"></div><div><div class="s-area">Software design</div><div class="s-detail">Modular architecture · Separation of concerns · Configurable matching parameters · Multi-tab Streamlit UI</div></div></div>
+    </div>
+    <div class="stack-row reveal">
+      <div class="s-badge"><div class="s-bdot" style="background:#3776ab"></div>Python 3.10</div>
+      <div class="s-badge"><div class="s-bdot" style="background:#412991"></div>OpenAI GPT-4o</div>
+      <div class="s-badge"><div class="s-bdot" style="background:#150458"></div>Pandas</div>
+      <div class="s-badge"><div class="s-bdot" style="background:#ff4b4b"></div>Streamlit</div>
+      <div class="s-badge"><div class="s-bdot" style="background:#217346"></div>openpyxl</div>
+      <div class="s-badge"><div class="s-bdot" style="background:#f34f29"></div>GitHub Pages</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section class="cta-sec">
+  <div class="wrap">
+    <div class="reveal">
+      <h2 class="cta-title">See all three in action</h2>
+      <p class="cta-sub">Sample data pre-loaded. Click Run reconciliation on any tab.</p>
+      <div class="cta-actions">
+        <a href="app_demo.html" class="btn-main"><svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="2,1 12,6.5 2,12"/></svg>Open live demo</a>
+        <a href="https://github.com/johnperezlondon-star/recon-ai" target="_blank" class="btn-outline"><svg width="13" height="13" viewBox="0 0 13 13" fill="currentColor"><path d="M6.5 0C2.9 0 0 2.9 0 6.5c0 2.9 1.9 5.3 4.5 6.2.3.1.4-.1.4-.3v-1.1C3 11.8 2.7 10.8 2.7 10.8c-.3-.8-.7-1-.7-1-.6-.4 0-.4 0-.4.7.1 1 .7 1 .7.6 1 1.5.7 1.9.5.1-.4.2-.7.4-.9C3.9 9.5 2.5 9 2.5 6.4c0-.7.3-1.3.7-1.8-.1-.2-.3-.8.1-1.7 0 0 .6-.2 1.8.7A6.3 6.3 0 016.5 3.3c.6 0 1.1.1 1.6.2 1.3-.8 1.8-.7 1.8-.7.4.9.1 1.6.1 1.7.4.5.7 1 .7 1.8 0 2.6-1.5 3.1-2.8 3.2.2.2.4.6.4 1.1v1.7c0 .2.1.4.4.3C11.1 11.8 13 9.4 13 6.5 13 2.9 10.1 0 6.5 0z"/></svg>Browse the code</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-left">Built by John Perez · Finance AI Portfolio · 2024</div>
+    <div class="footer-right">
+      <a href="https://github.com/johnperezlondon-star" target="_blank">GitHub</a>
+      <a href="app_demo.html">Live demo</a>
+      <a href="https://johnperezlondon-star.github.io/variance-analyser/">Variance analyser →</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const obs=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting)setTimeout(()=>e.target.classList.add('visible'),i*80);});},{threshold:0.1});
+document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
